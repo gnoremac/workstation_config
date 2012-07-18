@@ -1,2 +1,4 @@
 workstation_config
 ==================
+
+SETUP
