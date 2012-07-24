@@ -119,6 +119,13 @@ export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 # ... or force ignoredups and ignorespace
 export HISTCONTROL=ignoreboth
 
+function parse_git_dirty {
+  [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
+}
+
+function parse_git_branch {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[\1$(parse_git_dirty)]/"
+}
 
 #### Colours ^ Prompt ####
 case "$TERM" in
@@ -126,7 +133,10 @@ case "$TERM" in
 esac
 case "$TERM" in
 xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    WHITE="\[\033[0;37m\]"
+    BLUE="\[\033[0;34m\]"
+    PS1="$WHITE\w $BLUE\$(parse_git_branch)$WHITE\$ "
+    PS1="$WHITE\u@\h \w $BLUE\$(parse_git_branch)$WHITE\$ "
     ;;
 *)
     ;;
