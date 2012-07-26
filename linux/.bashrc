@@ -1,10 +1,15 @@
 UNAME=uname
 
+### THIS MACHINE SPECIFIC STUFF ####
+export M2=~/.m2/repository
+export WORKON_HOME=~/Envs
+export ANDROID_HOME=~/workspace/java/android-sdk-linux
+
 # Reload this file due to frequent edits
 alias reload='source ~/.bashrc'
 
 #### PATH ####
-export PATH=$PATH:~/bin:
+export PATH=$PATH:~/bin:$ANDROID_HOME/tools
 export LD_LIBRARY_PATH=`pwd`
 
 #### Defaults ####
@@ -43,6 +48,9 @@ fi
 # emacs modes
 alias gemacs="emacs-snapshot-gtk"
 alias nemacs="emacs -nw"
+
+# maven stuff
+alias mvnc="mvn clean && mvn -Dmaven.test.skip=true install"
 
 # moving aliases
 alias ..='cd ..'
@@ -124,30 +132,39 @@ function parse_git_dirty {
 }
 
 function parse_git_branch {
-  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[\1$(parse_git_dirty)]/"
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[git-\1$(parse_git_dirty)]/"
+}
+
+function hg_dirty() {
+    hg status --no-color 2> /dev/null \
+    | awk '$1 == "?" { unknown = 1 } 
+           $1 != "?" { changed = 1 }
+           END {
+             if (changed) printf "!"
+             else if (unknown) printf "?" 
+           }'
+}
+
+function hg_branch() {
+    hg branch 2> /dev/null | sed -e '/^[.*]/d' -e "s/\(^.*\)/[hg-\1$(hg_dirty)]/"
 }
 
 #### Colours ^ Prompt ####
-case "$TERM" in
-    xterm-color) color_prompt=yes;;
-esac
-case "$TERM" in
-xterm*|rxvt*)
-    WHITE="\[\033[0;37m\]"
-    BLUE="\[\033[0;34m\]"
-    PS1="$WHITE\w $BLUE\$(parse_git_branch)$WHITE\$ "
-    PS1="$WHITE\u@\h \w $BLUE\$(parse_git_branch)$WHITE\$ "
-    ;;
-*)
-    ;;
-esac
-
+DEFAULT="[37;40m"
+PINK="[35;40m"
+GREEN="[32;40m"
+ORANGE="[33;40m"
+PS1='\n\e${PINK}\u \
+\e${DEFAULT}at \e${ORANGE}\h \
+\e${DEFAULT}in \e${GREEN}\w\
+\e${ORANGE}$(parse_git_branch) \
+\e${ORANGE}$(hg_branch) \
+\n$ '
 
 ### Completion ###
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
-
 
 # Support for multiple interpreters.
 
@@ -166,4 +183,14 @@ fi
 bind '"\C-f\C-g": "find . | grep "';
 bind '"\C-f\C-x": "find . | xargs grep "'
 bind '"\C-p\C-a": "ps aux | grep "'
+
+# Hookup Python VirtualEnvironments
+source /usr/local/bin/virtualenvwrapper.sh
+
+# Display to the terminal
+function osd {
+    osd_cat --align=center --pos=middle --outline=1 \
+	--outlinecolour=#000000 --delay=3 --font="$font" \
+	"$@"
+}
 
