@@ -131,12 +131,12 @@ export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 # ... or force ignoredups and ignorespace
 export HISTCONTROL=ignoreboth
 
-function parse_git_dirty {
+function git_dirty {
   [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
 }
 
-function parse_git_branch {
-  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[git-\1$(parse_git_dirty)]/"
+function git_branch {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/[git-\1$(git_dirty)]/"
 }
 
 function hg_dirty() {
@@ -161,7 +161,7 @@ ORANGE="[33;40m"
 PS1='\n\e${PINK}\u \
 \e${DEFAULT}at \e${ORANGE}\h \
 \e${DEFAULT}in \e${GREEN}\w\
-\e${ORANGE}$(parse_git_branch) \
+\e${ORANGE}$(git_branch) \
 \e${ORANGE}$(hg_branch) \
 \n$ '
 
