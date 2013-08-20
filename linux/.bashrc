@@ -1,3 +1,11 @@
+#
+# If not running interactively, don't do anything
+#
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
 UNAME=uname
 
 ### THIS MACHINE SPECIFIC STUFF ####
@@ -16,56 +24,54 @@ export LD_LIBRARY_PATH=`pwd`
 # Default editor
 export EDITOR="emacs -nw -q"
 
-#### Aiases ####
-#alias ll='ls -l | grep -v -E ".pyc$|~$"'
-alias lx='ls -lXB'               # sort by extension
-alias lk='ls -lSr'               # sort by size
-alias lm='ls -alh |more'         # pipe through 'more'
-alias lsd='ls -lh | grep "^d"'   # list only directories
-alias lsl='ls -lh | grep "^l"'   # list only links
-# list long, human readable, ignore implied~,
-# ignore compiled python files
-alias ll='ls -hlB --group-directories-first --hide=*.pyc'
- # list including .dotfiles
-alias lsa='ls -lAh --group-directories-first'
-alias lz="ls -lZ"                # SELinux display
-
-## directory aliases
-alias mkdir='mkdir -p'  #Make intermediaries
-# Disk usage
-alias du="du -h"
-# Grepping
-alias h="history | grep"
 #enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
-    eval "`dircolors -b`"
+    #eval "`dircolors -b`"
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
 
-# emacs modes
-alias gemacs="emacs-snapshot-gtk"
-alias nemacs="emacs -nw"
+# don't put duplicate lines in the history. See bash(1) for more options
+# don't overwrite GNU Midnight Commander's setting of `ignorespace'.
+export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
+# ... or force ignoredups and ignorespace
+export HISTCONTROL=ignoreboth
 
-# maven stuff
-alias mvnc="mvn clean && mvn -Dmaven.test.skip=true install"
+# don't put duplicate lines in the history. See bash(1) for more options
+# don't overwrite GNU Midnight Commander's setting of `ignorespace'.
+export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
+# ... or force ignoredups and ignorespace
+export HISTCONTROL=ignoreboth
 
-# moving aliases
-alias ..='cd ..'
-alias ...='cd ../..'
-alias downloads='cd ~/downloads'
+# append to the history file, don't overwrite it
+shopt -s histappend
 
-# apt aliases
-alias ainstall='sudo apt-get install'
+# History settings file size
+HISTSIZE=1000
+HISTFILESIZE=2000
 
-# Misc
-alias rtfm='man'
+# Check window size after each command and, if necessary,
+# update the values of LINES and COLUMNS
+shopt -s checkwinsize
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
 
 # local aliases
 if [ -f ~/.bash_aliases ]; then
    . ~/.bash_aliases
+fi
+
+# Hookup Python VirtualEnvironments
+if [ -f /usr/local/bin/virtualenvwrapper.sh ]; then
+    source /usr/local/bin/virtualenvwrapper.sh
 fi
 
 #### Bash Functions ####
@@ -121,12 +127,6 @@ function catorls () {
 }
 alias cat="catorls"
 
-# don't put duplicate lines in the history. See bash(1) for more options
-# don't overwrite GNU Midnight Commander's setting of `ignorespace'.
-export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
-# ... or force ignoredups and ignorespace
-export HISTCONTROL=ignoreboth
-
 function parse_git_dirty {
   [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
 }
@@ -154,12 +154,23 @@ DEFAULT="[37;40m"
 PINK="[35;40m"
 GREEN="[32;40m"
 ORANGE="[33;40m"
-PS1='\n\e${PINK}\u \
-\e${DEFAULT}at \e${ORANGE}\h \
-\e${DEFAULT}in \e${GREEN}\w\
-\e${ORANGE}$(parse_git_branch) \
-\e${ORANGE}$(hg_branch) \
-\n$ '
+#PS1='\n\e${PINK}\u \
+#\e${DEFAULT}at \e${ORANGE}\h \
+#\e${DEFAULT}in \e${GREEN}\w\
+#\e${ORANGE}$(parse_git_branch) \
+#\e${ORANGE}$(hg_branch) \
+#\n$ '
+
+PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
 
 ### Completion ###
 if [ -f /etc/bash_completion ]; then
@@ -183,9 +194,6 @@ fi
 bind '"\C-f\C-g": "find . | grep "';
 bind '"\C-f\C-x": "find . | xargs grep "'
 bind '"\C-p\C-a": "ps aux | grep "'
-
-# Hookup Python VirtualEnvironments
-source /usr/local/bin/virtualenvwrapper.sh
 
 # Display to the terminal
 function osd {
