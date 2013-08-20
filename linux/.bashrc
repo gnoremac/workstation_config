@@ -69,6 +69,11 @@ if [ -f ~/.bash_aliases ]; then
    . ~/.bash_aliases
 fi
 
+# Sexy Bash Prompt
+if [ -f ~/.bash_prompt ]; then
+   . ~/.bash_prompt
+fi
+
 # Hookup Python VirtualEnvironments
 if [ -f /usr/local/bin/virtualenvwrapper.sh ]; then
     source /usr/local/bin/virtualenvwrapper.sh
@@ -202,3 +207,5 @@ function osd {
 	"$@"
 }
 
+# Run twolfson/sexy-bash-prompt
+. ~/.bash_prompt
