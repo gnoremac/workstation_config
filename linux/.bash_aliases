@@ -36,3 +36,6 @@ alias ainstall='sudo apt-get install'
 
 # Misc
 alias rtfm='man'
+
+# Verify mvn build
+alias verify='mvn checkstyle:checkstyle checkstyle:check pmd:pmd pmd:check && mvn test -T4'
