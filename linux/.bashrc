@@ -17,7 +17,7 @@ export ANDROID_HOME=~/workspace/java/android-sdk-linux
 alias reload='source ~/.bashrc'
 
 #### PATH ####
-export PATH=$PATH:~/bin:$ANDROID_HOME/tools
+export PATH=$PATH:~/bin:$ANDROID_HOME/tools:/usr/local/go/bin
 export LD_LIBRARY_PATH=`pwd`
 
 #
