@@ -1,0 +1,69 @@
+#####################################################
+#### Functions #######
+#####################################################
+
+#
+# Create and initialize a git repo
+#
+function ginit {
+    mkdir $1
+    cd $1
+    git init
+}
+
+#
+# Display to the terminal
+#
+function osd {
+    osd_cat --align=center --pos=middle --outline=1 \
+	--outlinecolour=#000000 --delay=3 --font="$font" \
+	"$@"
+}
+
+# Killlist
+function killps {
+    ps aux | grep $1 | grep -v grep | awk {'print $2'} | xargs kill -9 2> /dev/null
+}
+
+# Makes directory then moves into it
+function mkcdr {
+    mkdir -p -v $1
+    cd $1
+}
+
+# Easy extract
+extract () {
+  if [ -f $1 ] ; then
+      case $1 in
+          *.tar.bz2)   tar xvjf $1    ;;
+          *.tar.gz)    tar xvzf $1    ;;
+          *.bz2)       bunzip2 $1     ;;
+          *.rar)       rar x $1       ;;
+          *.gz)        gunzip $1      ;;
+          *.tar)       tar xvf $1     ;;
+          *.tbz2)      tar xvjf $1    ;;
+          *.tgz)       tar xvzf $1    ;;
+          *.zip)       unzip $1       ;;
+          *.Z)         uncompress $1  ;;
+          *.7z)        7z x $1        ;;
+          *)           echo "don't know how to extract '$1'..." ;;
+      esac
+  else
+      echo "'$1' is not a valid file!"
+  fi
+}
+
+# A frequent source of complaint from cat
+# is that I've just asked it to cat a directory.
+# If I have, just DWIM and do it happily.
+function catorls () {
+    if [ -d $1 ];
+    then
+        ls -l $1
+    else
+        cat $1
+    fi
+}
+alias cat="catorls"
+
+
