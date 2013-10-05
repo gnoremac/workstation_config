@@ -4,7 +4,7 @@ UNAME=uname
 export M2=~/.m2/repository
 export WORKON_HOME=~/Envs
 export ANDROID_HOME=~/workspace/java/android-sdk-linux
-export HADOOP_HOME=/usr/local/hadoop-2.0.0-mr1-cdh4.1.2/
+#export HADOOP_HOME=/usr/local/hadoop-2.0.0-mr1-cdh4.1.2/
 
 # Reload this file due to frequent edits
 alias reload='source ~/.bash_profile'
@@ -13,7 +13,7 @@ alias reload='source ~/.bash_profile'
 #export PATH=$PATH:~/bin:$ANDROID_HOME/tools
 export PATH=/usr/local/share/python:/usr/local/bin:/usr/bin:$PATH
 export PATH=$PATH:/usr/local/share/npm/bin
-export PATH=$PATH:$HADOOP_HOME/bin
+#export PATH=$PATH:$HADOOP_HOME/bin
 export LD_LIBRARY_PATH=`pwd`
 
 #### Defaults ####
@@ -132,7 +132,7 @@ export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups
 export HISTCONTROL=ignoreboth
 
 function git_dirty {
-  [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit, working directory clean" ]] && echo "*"
+  [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
 }
 
 function git_branch {
