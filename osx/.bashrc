@@ -11,13 +11,14 @@ UNAME=uname
 ### THIS MACHINE SPECIFIC STUFF ####
 export M2=~/.m2/repository
 export WORKON_HOME=~/Envs
-export ANDROID_HOME=~/workspace/java/android-sdk-linux
 
 # Reload this file due to frequent edits
 alias reload='source ~/.bashrc'
 
 #### PATH ####
-export PATH=$PATH:~/bin:$ANDROID_HOME/tools:/usr/local/go/bin
+export PATH=/usr/local/bin:$PATH
+export PATH=$PATH:~/bin:/usr/local/go/bin
+export PATH=$PATH:/usr/local/share/npm/bin
 export LD_LIBRARY_PATH=`pwd`
 
 #
