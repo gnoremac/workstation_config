@@ -16,7 +16,7 @@ export WORKON_HOME=~/Envs
 alias reload='source ~/.bashrc'
 
 #### PATH ####
-export PATH=/usr/local/bin:$PATH
+export PATH=/usr/local/bin:/usr/local/sbin:$PATH
 export PATH=$PATH:~/bin:/usr/local/go/bin
 export PATH=$PATH:/usr/local/share/npm/bin
 export LD_LIBRARY_PATH=`pwd`
