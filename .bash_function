@@ -66,4 +66,28 @@ function catorls () {
 }
 alias cat="catorls"
 
+# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
+# the `.git` directory, listing directories first. The output gets piped into
+# `less` with options to preserve color and line numbers, unless the output is
+# small enough for one screen.
+function tre() {
+	 tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
+}
 
+# Get a character’s Unicode code point
+function codepoint() {
+	 perl -e "use utf8; print sprintf('U+%04X', ord(\"$@\"))";
+	 # print a newline unless we’re piping the output to another program
+	 if [ -t 1 ]; then
+	    echo ""; # newline
+	    fi;
+}
+
+# Decode \x{ABCD}-style Unicode escape sequences
+function unidecode() {
+	 perl -e "binmode(STDOUT, ':utf8'); print \"$@\"";
+	 # print a newline unless we’re piping the output to another program
+	 if [ -t 1 ]; then
+	    echo ""; # newline
+	    fi;
+}

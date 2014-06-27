@@ -1,0 +1,31 @@
+# Default editor
+export EDITOR="emacs -nw -q"
+
+# History settings file size
+export HISTSIZE=32768;
+export HISTFILESIZE=$HISTSIZE;
+export HISTCONTROL=ignoredups;
+
+# Make some commands not show up in history
+export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help";
+
+# Prefer US English and use UTF-8
+export LANG="en_US.UTF-8";
+export LC_ALL="en_US.UTF-8";
+
+# Don’t clear the screen after quitting a manual page
+export MANPAGER="less -X";
+
+# Always enable colored `grep` output
+export GREP_OPTIONS="--color=auto";
+
+### THIS MACHINE SPECIFIC STUFF ####
+export M2=~/.m2/repository
+export WORKON_HOME=~/Envs
+
+#### PATH ####
+export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+export PATH=$PATH:~/bin:/usr/local/go/bin
+export PATH=$PATH:/usr/local/share/npm/bin
+export LD_LIBRARY_PATH=`pwd`
+
