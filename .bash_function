@@ -91,3 +91,7 @@ function unidecode() {
 	    echo ""; # newline
 	    fi;
 }
+
+function big() {
+    find /home/cgandevia -type f -size +"$@"k -exec ls -lh {} \; | awk '{ print $9 ": " $5 }'
+}

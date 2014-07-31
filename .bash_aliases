@@ -43,7 +43,8 @@ alias gemacs="emacs-snapshot-gtk"
 alias nemacs="emacs -nw"
 
 # maven stuff
-alias mvnc="mvn clean && mvn -Dmaven.test.skip=true install"
+alias mvn2="mvn clean && mvn -Dmaven.test.skip=true -T 2C install"
+alias mvn3="mvn clean && mvn -T 2C install"
 
 # moving aliases
 alias ..='cd ..'
@@ -58,10 +59,10 @@ alias ainstall='sudo apt-get install'
 alias rtfm='man'
 
 # Verify mvn build
-alias verify='mvn checkstyle:checkstyle checkstyle:check pmd:pmd pmd:check && mvn test -T4'
+alias verify='mvn checkstyle:checkstyle checkstyle:check pmd:pmd pmd:check'
 
 # Get OS X Software Updates, and update installed Ruby gems, Homebrew, npm
-alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; npm update npm -g; npm update -g; sudo gem update --system; sudo gem update'
+alias osx_update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; npm update npm -g; npm update -g; sudo gem update --system; sudo gem update'
 
 # View HTTP traffic
 alias sniff="sudo ngrep -d 'en1' -t '^(GET|POST) ' 'tcp and port 80'"
@@ -82,3 +83,6 @@ alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && kil
 alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
 alias localip="ipconfig getifaddr en0"
 alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
+
+# Top biggest files
+alias biggest='du -a /home/$USER | sort -n -r | head -n 10'
