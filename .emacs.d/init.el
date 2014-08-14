@@ -15,25 +15,29 @@
 (when (not package-archive-contents)
   (package-refresh-contents))
 (defvar gnoremac/packages
-  '(js2-mode ac-js2 yasnippet))
+  '(js2-mode ac-js2 yasnippet web-mode))
 (dolist (p gnoremac/packages)
   (when (not (package-installed-p p))
     (package-install p)))
 
 ;; yasnippet
-(require 'yasnippet)
-(yas-global-mode 1)
+;;(require 'yasnippet)
+;;(yas-global-mode 1)
 
 ;;; auto complete mod
 ;;; should be loaded after yasnippet so that they can work together
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-(ac-config-default)
+;;(require 'auto-complete-config)
+;;(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+;;(ac-config-default)
 ;;; set the trigger key so that it can work together with yasnippet on tab key,
 ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
 ;;; activate, otherwise, auto-complete will
-(ac-set-trigger-key "TAB")
-(ac-set-trigger-key "<tab>")
+;;(ac-set-trigger-key "TAB")
+;;(ac-set-trigger-key "<tab>")
+
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
 
 ;; to setup tabs
 (setq c-basic-indent 2)
