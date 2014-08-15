@@ -1,83 +1,197 @@
-;;; Emacs is not a package manager, and here we load its package manager!
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set up package.el and use-package for init
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(mapc (lambda (mode) (when (fboundp mode) (apply mode '(-1))))
+      '(tool-bar-mode
+        menu-bar-mode
+        scroll-bar-mode))
+
+(setq ring-bell-function #'ignore
+      inhibit-startup-screen t
+      indent-tabs-mode nil)
+
+(mapc (lambda (p) (push p load-path))
+      '("~/.emacs.d/use-package/"
+	"~/.emacs.d/gnoremac/"))
+
+(require 'use-package)
 (require 'package)
-(dolist (source '(("marmalade" . "http://marmalade-repo.org/packages/")
-                  ("elpa" . "http://tromey.com/elpa/")
-                  ;; TODO: Maybe, use this after emacs24 is released
-                  ;; (development versions of packages)
-                  ("melpa" . "http://melpa.milkbox.net/packages/")
-                  ))
-  (add-to-list 'package-archives source t))
+
+(defun depends--helper (deps body)
+  (let ((dep (if (stringp (car deps)) (pop deps) (cons 'quote (list (pop deps))))))
+    (list 'eval-after-load dep
+          (cons 'lambda (cons nil (if (not deps)
+                               body
+                             (list (depends--helper deps body))))))))
+
+(defmacro depends (&rest args)
+  (declare (indent defun))
+  (let ((dependencies nil))
+    (while (or (stringp (car args))
+              (symbolp (car args)))
+      (push (pop args) dependencies))
+    (depends--helper dependencies args)))
+
+;;(require 'keys)
+
+;; common lisp
+(use-package cl-lib)
+
+(dolist (p '(("marmalade" . "http://marmalade-repo.org/packages/")
+             ("melpa" . "http://melpa.milkbox.net/packages/")))
+  (add-to-list 'package-archives p))
+
+(when (and (member "--" command-line-args)
+         (member "-refresh" command-line-args))
+  (delete "-refresh" command-line-args)
+  (package-refresh-contents))
+
 (package-initialize)
 
-;;; Required packages
-;;; everytime emacs starts, it will automatically check if those packages are
-;;; missing, it will install them automatically
-(when (not package-archive-contents)
-  (package-refresh-contents))
-(defvar gnoremac/packages
-  '(js2-mode ac-js2 yasnippet web-mode))
-(dolist (p gnoremac/packages)
-  (when (not (package-installed-p p))
-    (package-install p)))
+(use-package undo-tree
+  :init (global-undo-tree-mode 1)
+  :bind (("C-c j" . undo-tree-undo)
+         ("C-c k" . undo-tree-redo)
+         ("C-c l" . undo-tree-switch-branch)
+         ("C-c ;" . undo-tree-visualize))
+  :ensure t)
 
-;; yasnippet
-;;(require 'yasnippet)
-;;(yas-global-mode 1)
+(use-package python
+  :mode ("\\<SConstruct\\>$" . python-mode)
+  :config (progn
+            (use-package elpy
+              :config (elpy-enable)
+              :ensure t)))
 
-;;; auto complete mod
-;;; should be loaded after yasnippet so that they can work together
-;;(require 'auto-complete-config)
-;;(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-;;(ac-config-default)
-;;; set the trigger key so that it can work together with yasnippet on tab key,
-;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
-;;; activate, otherwise, auto-complete will
-;;(ac-set-trigger-key "TAB")
-;;(ac-set-trigger-key "<tab>")
+(use-package web-mode
+  :mode ("\\.html$" . web-mode)
+  :config (progn
+            
 
-(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-(setq web-mode-markup-indent-offset 2)
-(setq web-mode-css-indent-offset 2)
+            (defun web-indirect-this-thing()
+              (interactive)
+              (let ((beg 0) (end 0))
+                (save-excursion
+                  (setq beg (progn (web-mode-forward-sexp -1)
+                                   (call-interactively 'web-mode-tag-end)
+                                   (point)))
+                  (setq end (progn  (web-mode-forward-sexp 1)
+                                    (point))))
+                (indirect-region beg end))))
+  :ensure t)
 
-;; to setup tabs
-(setq c-basic-indent 2)
-(setq tab-width 4)
-(setq-default indent-tabs-mode nil)
+;(use-package sublimity
+;  :if (GUI)
+;  :config (use-package sublimity-scroll
+;            :config (sublimity-global-mode t))
+;  :ensure t)
 
-;; enable js2-mode for javascript
-(add-hook 'js-mode-hook 'js2-minor-mode)
-(add-hook 'js2-mode-hook 'ac-js2-mode)
+(use-package multiple-cursors
+  :config (progn (defun jorbi/mc/mark-until-line-change (&optional up)
+                   (interactive "P")
+                   (unless (save-excursion
+                             (let ((col (current-column)))
+                               (forward-line (if up -1 1))
+                               (move-to-column col))
+                             (looking-at "\\( +\\| *$\\)"))
+                     (when up (next-line -1))
+                     (mc/mark-next-lines 1)
+                     (jorbi/mc/mark-until-line-change up)))
 
+                 (push 'jorbi/mc/mark-until-line-change mc/cmds-to-run-once))
 
-;; Oh, and here's a cute hack you might want to put in the sample .emacs
-;; file: it changes the color of the window if it's not on the local
-;; machine, or if it's running as root:
+  :bind (("C-c m" . mc/mark-next-like-this)
+         ("C-c C-m" . jorbi/mc/mark-until-line-change))
+  :ensure t)
 
-;; local emacs background:  whitesmoke
-;; remote emacs background: palegreen1
-;; root emacs background:   coral2
-(cond
- ((and (string-match "XEmacs" emacs-version)
-       (eq window-system 'x)
-       (boundp 'emacs-major-version)
-       (= emacs-major-version 19)
-       (>= emacs-minor-version 12))
-  (let* ((root-p (eq 0 (user-uid)))
-         (dpy (or (getenv "DISPLAY") ""))
-         (remote-p (not
-                    (or (string-match "^\\(\\|unix\\|localhost\\):" dpy)
-                        (let ((s (system-name)))
-                          (if (string-match "\\.\\(netscape\\|mcom\\)\\.com" s)
-                              (setq s (substring s 0 (match-beginning 0))))
-                          (string-match (concat "^" (regexp-quote s)) dpy)))))
-         (bg (cond (root-p "coral2")
-                   (remote-p "palegreen1")
-                   (t nil))))
-    (cond (bg
-           (let ((def (color-name (face-background 'default)))
-                 (faces (face-list)))
-             (while faces
-               (let ((obg (face-background (car faces))))
-                 (if (and obg (equal def (color-name obg)))
-                     (set-face-background (car faces) bg)))
-               (setq faces (cdr faces)))))))))
+(use-package ace-jump-mode
+  :bind ("C-c <SPC>" . ace-jump-mode)
+  :ensure t)
+
+(use-package ample-theme
+  :ensure t)
+
+(use-package s ;; string lib
+  :defer t
+  :ensure t)
+
+(use-package dash ;; list lib
+  :defer t
+  :ensure t)
+
+(use-package expand-region
+  :bind ("C-c e" . er/expand-region)
+  :ensure t)
+
+(use-package w3m
+  :defer t
+  :ensure t)
+
+(use-package gh
+  :defer t
+  :ensure t)
+
+(use-package helm
+  :defer t
+  :ensure t)
+
+(use-package google-this
+  :defer t
+  :ensure t)
+
+(use-package company
+  :defer t
+  :ensure t)
+
+(use-package auto-complete
+  :defer t
+  :config (progn
+            (require 'auto-complete-config)
+            (depends "slime"
+              (add-to-list 'ac-modes 'slime-repl-mode))
+            (depends "js2-mode"
+              (add-to-list 'ac-modes 'js2-mode))
+            (depends "js-mode"
+              (add-to-list 'ac-modes 'js-mode))
+	    (depends "emacs-lisp-mode"
+	      (add-to-list 'ac-modes 'emacs-lisp-mode))
+            (depends "enh-ruby-mode"
+              (add-to-list 'ac-modes 'enh-ruby-mode))
+            (ac-config-default)
+            (global-auto-complete-mode t))
+  :ensure t)
+
+(use-package powerline
+  :ensure t)
+
+(use-package gnoremac-powerline
+  :config (depends "powerline" "cl"
+            (setq-default mode-line-format jorbi/powerline-format)))
+
+(use-package yaml-mode
+  :defer t
+  :ensure t)
+
+(use-package highlight-indentation
+  :defer t
+  :ensure t)
+
+(use-package rainbow-mode
+  :defer t
+  :ensure t)
+
+(use-package js2-mode
+  :mode ("\\.js$" . js2-mode)
+  :init (setq js2-basic-offset 4)
+  :config (progn
+            (font-lock-add-keywords
+             'js2-mode
+             '(("\\(console\\)\\(\.\\)\\(log\\|trace\\)"
+                (1 font-lock-warning-face t)
+                (3 font-lock-warning-face t))))
+            (use-package ac-js2
+              :ensure t)
+
+            (use-package js2-refactor
+              :ensure t))
+  :ensure t)
