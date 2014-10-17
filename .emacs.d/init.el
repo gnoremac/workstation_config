@@ -51,6 +51,9 @@
 (unless (package-installed-p 'scala-mode2)
 (package-refresh-contents) (package-install 'scala-mode2))
 
+(use-package ample-theme
+  :ensure t)
+
 (use-package undo-tree
   :init (global-undo-tree-mode 1)
   :bind (("C-c j" . undo-tree-undo)
@@ -69,8 +72,6 @@
 (use-package web-mode
   :mode ("\\.html$" . web-mode)
   :config (progn
-            
-
             (defun web-indirect-this-thing()
               (interactive)
               (let ((beg 0) (end 0))
@@ -111,9 +112,6 @@
   :bind ("C-c <SPC>" . ace-jump-mode)
   :ensure t)
 
-(use-package ample-theme
-  :ensure t)
-
 (use-package s ;; string lib
   :defer t
   :ensure t)
@@ -134,9 +132,10 @@
   :defer t
   :ensure t)
 
-(use-package helm
-  :defer t
-  :ensure t)
+;;(use-package helm
+;;  :defer t
+;;  :bind ("C-c h" . helm-mini)
+;;  :ensure t)
 
 (use-package google-this
   :defer t
@@ -145,6 +144,14 @@
 (use-package company
   :defer t
   :ensure t)
+
+(use-package protobuf-mode
+  :ensure t
+  :defer t)
+
+(use-package thrift
+  :ensure t
+  :defer t)
 
 (use-package auto-complete
   :defer t
