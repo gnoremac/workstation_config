@@ -45,6 +45,7 @@ alias nemacs="emacs -nw"
 # maven stuff
 alias mvn2="mvn clean && mvn -Dmaven.test.skip=true -T 2C install"
 alias mvn3="mvn clean && mvn -T 2C install"
+alias mvn4="mvn clean && mvn -Dmaven.test.skip=true -Dpmd.failOnViolation=false -Dcheckstyle.skip=true -T 2C install"
 
 # moving aliases
 alias ..='cd ..'
