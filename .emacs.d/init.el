@@ -48,6 +48,9 @@
 
 (package-initialize)
 
+(unless (package-installed-p 'scala-mode2)
+(package-refresh-contents) (package-install 'scala-mode2))
+
 (use-package undo-tree
   :init (global-undo-tree-mode 1)
   :bind (("C-c j" . undo-tree-undo)
