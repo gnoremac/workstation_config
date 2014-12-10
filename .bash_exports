@@ -4,7 +4,21 @@ export EDITOR="emacs -nw -q"
 # History settings file size
 export HISTSIZE=32768;
 export HISTFILESIZE=$HISTSIZE;
-export HISTCONTROL=ignoredups;
+export HISTCONTROL=ignorespace:ignoredups;
+
+history() {
+    _bash_history_sync
+    builtin history "$@"
+}
+
+_bash_history_sync() {
+    builtin history -a
+    HISTFILESIZE=$HISTSIZE
+    builtin history -c
+    builtin history -r
+}
+
+PROMPT_COMMAND=_bash_history_sync
 
 # Make some commands not show up in history
 export HISTIGNORE="ls:cd:cd -:pwd:exit:date:* --help";
