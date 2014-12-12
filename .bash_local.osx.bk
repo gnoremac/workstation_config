@@ -1,5 +1,12 @@
 # JAVA
 export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
+export ANDROID_HOME=/usr/local/opt/android-sdk
+export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128M"
+
+# Scala
+export SBT_OPTS="-XX:+CMSClassUnloadingEnabled -XX:PermSize=256M -XX:MaxPermSize=512M"
+
+source ~/.profile
 
 function setjdk() {
     export JAVA_HOME=$(/usr/libexec/java_home -v $1)
