@@ -95,7 +95,3 @@ function unidecode() {
 function big() {
     find /home/cgandevia -type f -size +"$@"k -exec ls -lh {} \; | awk '{ print $9 ": " $5 }'
 }
-
-function setjdk() {
-    export JAVA_HOME=$(/usr/libexec/java_home -v $1)
-}

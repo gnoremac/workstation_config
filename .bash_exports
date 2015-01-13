@@ -42,6 +42,3 @@ export PATH=/usr/local/bin:/usr/local/sbin:$PATH
 export PATH=$PATH:~/bin:/usr/local/go/bin
 export PATH=$PATH:/usr/local/share/npm/bin
 export LD_LIBRARY_PATH=`pwd`
-
-# JAVA
-export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
