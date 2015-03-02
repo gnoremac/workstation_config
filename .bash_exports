@@ -39,8 +39,9 @@ export WORKON_HOME=~/Envs
 
 #### PATH ####
 export PATH=/usr/local/bin:/usr/local/sbin:$PATH
-export PATH=$PATH:~/bin:/usr/local/go/bin
+export PATH=$PATH:/usr/local/opt/go/libexec/bin
 export PATH=$PATH:/usr/local/share/npm/bin
+export PATH=$PATH:$GOPATH/bin
 export LD_LIBRARY_PATH=`pwd`
 
 

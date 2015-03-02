@@ -110,6 +110,10 @@
          ("C-c C-m" . jorbi/mc/mark-until-line-change))
   :ensure t)
 
+(use-package go-mode
+  :defer t
+  :ensure t)
+
 (use-package ace-jump-mode
   :bind ("C-c <SPC>" . ace-jump-mode)
   :ensure t)
