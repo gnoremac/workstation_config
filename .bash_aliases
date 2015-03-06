@@ -87,3 +87,9 @@ alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[
 
 # Top biggest files
 alias biggest='du -a /home/$USER | sort -n -r | head -n 10'
+
+# Search file types for something excluding maven target dir
+maven_find() {
+    find -name *.$1 | grep -v 'target' | xargs grep $2
+}
+alias mfind=maven_find
