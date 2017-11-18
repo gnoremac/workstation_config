@@ -30,9 +30,6 @@ export LC_ALL="en_US.UTF-8";
 # Don’t clear the screen after quitting a manual page
 export MANPAGER="less -X";
 
-# Always enable colored `grep` output
-export GREP_OPTIONS="--color=auto";
-
 ### THIS MACHINE SPECIFIC STUFF ####
 export M2=~/.m2/repository
 export WORKON_HOME=~/Envs

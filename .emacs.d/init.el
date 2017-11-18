@@ -10,6 +10,8 @@
       inhibit-startup-screen t
       indent-tabs-mode nil)
 
+(setq x-select-enable-clipboard t)
+
 (mapc (lambda (p) (push p load-path))
       '("~/.emacs.d/use-package/"
 	"~/.emacs.d/gnoremac/"))
@@ -48,8 +50,8 @@
 
 (package-initialize)
 
-(unless (package-installed-p 'scala-mode2)
-(package-refresh-contents) (package-install 'scala-mode2))
+(unless (package-installed-p 'scala-mode)
+(package-refresh-contents) (package-install 'scala-mode))
 
 ;;
 

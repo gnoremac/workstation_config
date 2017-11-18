@@ -92,4 +92,10 @@ alias biggest='du -a /home/$USER | sort -n -r | head -n 10'
 maven_find() {
     find -name *.$1 | grep -v 'target' | xargs grep $2
 }
+
+fpp_maven_find() {
+    find -name *.$1 | grep -v 'target' | xargs grep -l $2 | fpp
+}
+
 alias mfind=maven_find
+alias ffind=fpp_maven_find
