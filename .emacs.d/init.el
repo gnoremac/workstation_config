@@ -1,215 +1,203 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set up package.el and use-package for init
 ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(mapc (lambda (mode) (when (fboundp mode) (apply mode '(-1))))
-      '(tool-bar-mode
-        menu-bar-mode
-        scroll-bar-mode))
-
-(setq ring-bell-function #'ignore
-      inhibit-startup-screen t
-      indent-tabs-mode nil)
-
-(setq x-select-enable-clipboard t)
-
-(mapc (lambda (p) (push p load-path))
-      '("~/.emacs.d/use-package/"
-	"~/.emacs.d/gnoremac/"))
-
-(require 'use-package)
 (require 'package)
-
-(defun depends--helper (deps body)
-  (let ((dep (if (stringp (car deps)) (pop deps) (cons 'quote (list (pop deps))))))
-    (list 'eval-after-load dep
-          (cons 'lambda (cons nil (if (not deps)
-                               body
-                             (list (depends--helper deps body))))))))
-
-(defmacro depends (&rest args)
-  (declare (indent defun))
-  (let ((dependencies nil))
-    (while (or (stringp (car args))
-              (symbolp (car args)))
-      (push (pop args) dependencies))
-    (depends--helper dependencies args)))
-
-;;(require 'keys)
-
-;; common lisp
-(use-package cl-lib)
-
-(dolist (p '(("marmalade" . "http://marmalade-repo.org/packages/")
-             ("melpa" . "http://melpa.milkbox.net/packages/")))
-  (add-to-list 'package-archives p))
-
-(when (and (member "--" command-line-args)
-         (member "-refresh" command-line-args))
-  (delete "-refresh" command-line-args)
-  (package-refresh-contents))
-
+(add-to-list 'package-archives
+             '("melpa-stable" . "http://melpa.org/packages/") t)
 (package-initialize)
 
-(unless (package-installed-p 'scala-mode)
-(package-refresh-contents) (package-install 'scala-mode))
+;; use-package
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)
+(require 'bind-key)
 
-;;
+;; Turn off mouse interface early in startup to avoid momentary display
+(when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
+(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-(use-package ample-theme
-  :ensure t)
+;; disable startup message
+(setq inhibit-startup-message t)
 
-(use-package undo-tree
-  :init (global-undo-tree-mode 1)
-  :bind (("C-c j" . undo-tree-undo)
-         ("C-c k" . undo-tree-redo)
-         ("C-c l" . undo-tree-switch-branch)
-         ("C-c ;" . undo-tree-visualize))
-  :ensure t)
+;; disable beep sound
+(setq ring-bell-function 'ignore)
 
-(use-package python
-  :mode ("\\<SConstruct\\>$" . python-mode)
-  :config (progn
-            (use-package elpy
-              :config (elpy-enable)
-              :ensure t)))
+;; getting rid of the "yes or no" prompt and replace it with "y or n"
+(defalias 'yes-or-no-p 'y-or-n-p)
 
+;; disable confirmation if a file or buffer does not exist when you
+;; use C-x C-f or C-x b
+(setq confirm-nonexistent-file-or-buffer nil)
+
+;; disable confirmation when kill a buffer with a live process
+;; attached to it
+(setq kill-buffer-query-functions
+  (remq 'process-kill-buffer-query-function
+        kill-buffer-query-functions))
+
+;; making tooltips appear in the echo area
+(tooltip-mode 0)
+(setq tooltip-use-echo-area t)
+
+;; highlight current line
+(global-hl-line-mode 1)
+
+;; display column number in mode line
+(column-number-mode 1)
+
+;; show buffer file name in title bar
+(setq frame-title-format
+      '((:eval (if (buffer-file-name)
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b"))))
+
+;; change indentation
+(setq-default tab-width 4)
+(setq-default indent-tabs-mode nil)
+(setq tab-stop-list (number-sequence 4 200 4))
+
+;; enable case conversion
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+
+;; use ibuffer instead of buffer
+(bind-key "C-x C-b" 'ibuffer)
+
+;; store all backup and autosave files in the tmp dir
+(setq backup-directory-alist
+      `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
+
+;; delete selection on insert
+(delete-selection-mode 1)
+
+;; use extra dired features
+(require 'dired-x)
+
+;; undo/redo window configuration
+(winner-mode 1)
+
+;; making buffer names unique
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
+
+;; use trash
+(setq delete-by-moving-to-trash t)
+
+;; confirm to quit
+(setq confirm-kill-emacs #'y-or-n-p)
+
+;; help key binding
+(bind-key "C-z" 'help-command)
+
+;; solarized-theme
+(use-package solarized-theme
+  :ensure t
+  :config
+  (setq solarized-distinct-fringe-background t)
+  (setq solarized-use-variable-pitch nil)
+  (setq solarized-scale-org-headlines nil)
+  (setq solarized-high-contrast-mode-line t)
+  (load-theme 'solarized-light t))
+
+;; electric-pair-mode
+(electric-pair-mode 1)
+(show-paren-mode 1)
+
+;; gitignore-mode
+(use-package gitignore-mode
+  :ensure t
+  :config
+  (add-hook 'gitignore-mode-hook (lambda ()
+                                   (setq require-final-newline t))))
+
+;; yaml-mode
+(use-package yaml-mode
+  :ensure t
+  :mode "\\.sls$"
+  :config
+  (add-hook 'yaml-mode-hook (lambda ()
+                              (setq require-final-newline t))))
+
+;; cc-mode
+(use-package cc-mode
+  :config
+  (add-hook 'c-mode-common-hook
+            (lambda ()
+              (local-set-key (kbd "C-M-h") 'backward-kill-word)
+              (local-set-key (kbd "C-c h") 'c-mark-function))))
+
+;; web-mode
 (use-package web-mode
-  :mode ("\\.html$" . web-mode)
-  :config (progn
-            (defun web-indirect-this-thing()
-              (interactive)
-              (let ((beg 0) (end 0))
-                (save-excursion
-                  (setq beg (progn (web-mode-forward-sexp -1)
-                                   (call-interactively 'web-mode-tag-end)
-                                   (point)))
-                  (setq end (progn  (web-mode-forward-sexp 1)
-                                    (point))))
-                (indirect-region beg end))))
+  :ensure t
+  :mode "\\.html?\\'")
+
+;; undo-tree
+(use-package undo-tree
+  :ensure t
+  :diminish undo-tree-mode
+  :config
+  (global-undo-tree-mode 1))
+
+(use-package flycheck-gometalinter
+  :ensure t
+  :config
+  (flycheck-gometalinter-setup)
+  (setq flycheck-gometalinter-fast t)
+  (setq flycheck-gometalinter-disable-linters '("gotype")))
+
+;; flycheck
+(use-package flycheck
+  :ensure t
+  :config
+  (setq flycheck-check-syntax-automatically '(mode-enabled save))
+  (add-hook 'python-mode-hook 'flycheck-mode)
+  (add-hook 'go-mode-hook 'flycheck-mode)
+  (add-hook 'sh-mode-hook 'flycheck-mode)
+  (add-hook 'rst-mode-hook 'flycheck-mode)
+  (add-hook 'js-mode-hook 'flycheck-mode))
+
+;; markdown-mode
+(use-package markdown-mode
+  :ensure t
+  :mode "\\.md\\'")
+
+;; dockerfile-mode
+(use-package dockerfile-mode
   :ensure t)
 
-;(use-package sublimity
-;  :if (GUI)
-;  :config (use-package sublimity-scroll
-;            :config (sublimity-global-mode t))
-;  :ensure t)
-
-(use-package multiple-cursors
-  :config (progn (defun jorbi/mc/mark-until-line-change (&optional up)
-                   (interactive "P")
-                   (unless (save-excursion
-                             (let ((col (current-column)))
-                               (forward-line (if up -1 1))
-                               (move-to-column col))
-                             (looking-at "\\( +\\| *$\\)"))
-                     (when up (next-line -1))
-                     (mc/mark-next-lines 1)
-                     (jorbi/mc/mark-until-line-change up)))
-
-                 (push 'jorbi/mc/mark-until-line-change mc/cmds-to-run-once))
-
-  :bind (("C-c m" . mc/mark-next-like-this)
-         ("C-c C-m" . jorbi/mc/mark-until-line-change))
-  :ensure t)
-
-(use-package go-mode
-  :defer t
-  :ensure t)
-
-(use-package ace-jump-mode
-  :bind ("C-c <SPC>" . ace-jump-mode)
-  :ensure t)
-
-(use-package s ;; string lib
-  :defer t
-  :ensure t)
-
-(use-package dash ;; list lib
-  :defer t
-  :ensure t)
-
-(use-package expand-region
-  :bind ("C-c e" . er/expand-region)
-  :ensure t)
-
-(use-package w3m
-  :defer t
-  :ensure t)
-
-(use-package gh
-  :defer t
-  :ensure t)
-
-;;(use-package helm
-;;  :defer t
-;;  :bind ("C-c h" . helm-mini)
-;;  :ensure t)
-
-(use-package google-this
-  :defer t
-  :ensure t)
-
-(use-package company
-  :defer t
-  :ensure t)
-
+;; protobuf
 (use-package protobuf-mode
   :ensure t
-  :defer t)
+  :config
+  (defconst my-protobuf-style
+    '((c-basic-offset . 4)
+      (indent-tabs-mode . nil)))
+  (add-hook 'protobuf-mode-hook
+            (lambda () (c-add-style "my-style" my-protobuf-style t))))
 
-(use-package thrift
+;; js-mode
+(use-package js
+  :config
+  (setq js-indent-level 2)
+  (add-hook 'projectile-after-switch-project-hook 'setup-local-standard)
+  (add-hook 'projectile-after-switch-project-hook 'setup-local-tern)
+  (add-hook 'js-mode-hook
+            (lambda () (setq flycheck-enabled-checkers '(javascript-standard)))))
+
+(use-package auto-package-update
   :ensure t
-  :defer t)
+  :config
+  (setq auto-package-update-delete-old-versions t)
+  (auto-package-update-maybe))
 
-(use-package auto-complete
-  :defer t
-  :config (progn
-            (require 'auto-complete-config)
-            (depends "slime"
-              (add-to-list 'ac-modes 'slime-repl-mode))
-            (depends "js2-mode"
-              (add-to-list 'ac-modes 'js2-mode))
-            (depends "js-mode"
-              (add-to-list 'ac-modes 'js-mode))
-	    (depends "emacs-lisp-mode"
-	      (add-to-list 'ac-modes 'emacs-lisp-mode))
-            (depends "enh-ruby-mode"
-              (add-to-list 'ac-modes 'enh-ruby-mode))
-            (ac-config-default)
-            (global-auto-complete-mode t))
-  :ensure t)
 
-(use-package powerline
-  :ensure t)
 
-(use-package gnoremac-powerline
-  :config (depends "powerline" "cl"
-            (setq-default mode-line-format jorbi/powerline-format)))
 
-(use-package yaml-mode
-  :defer t
-  :ensure t)
 
-(use-package highlight-indentation
-  :defer t
-  :ensure t)
 
-(use-package rainbow-mode
-  :defer t
-  :ensure t)
-
-(use-package js2-mode
-  :mode ("\\.js$" . js2-mode)
-  :init (setq js2-basic-offset 4)
-  :config (progn
-            (font-lock-add-keywords
-             'js2-mode
-             '(("\\(console\\)\\(\.\\)\\(log\\|trace\\)"
-                (1 font-lock-warning-face t)
-                (3 font-lock-warning-face t))))
-            (use-package ac-js2
-              :ensure t)
-
-            (use-package js2-refactor
-              :ensure t))
-  :ensure t)
