@@ -171,6 +171,10 @@
 (use-package dockerfile-mode
   :ensure t)
 
+;; thrift
+(use-package thrift
+  :ensure t)
+
 ;; protobuf
 (use-package protobuf-mode
   :ensure t
